@@ -93,7 +93,6 @@ Nombre de runs : {runsNumber}<br>
   </tbody>
 </table>
 {/if}
-
 <p>
   Conçu par la grâce de Maxtodonte2
 </p>
