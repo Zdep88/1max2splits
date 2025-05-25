@@ -54,7 +54,7 @@ const setFile = (e) => {
 <input type="file" name="file" id="file" accept=".lss" onchange={setFile} />
 
 {#if xml}
-<h2>Analyse du fichier</h2>
+<h2>Récap du fichier</h2>
 Version : {version}<br>
 Jeu : {gameName}<br>
 Catégorie : {categoryName}<br>
