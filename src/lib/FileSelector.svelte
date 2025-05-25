@@ -1,6 +1,4 @@
 <script>
-// @ts-nocheck
-
 let file = $state(null);
 let xml = $state(null);
 let version = $state(null);
@@ -14,7 +12,7 @@ const setFile = (e) => {
 	const reader = new FileReader();
 	reader.readAsText(file);
 	reader.onload = (event) => {
-		const data = event.target.result;
+		const data = event.target.result.toString();
 		const domParser = new window.DOMParser();
 		xml = domParser.parseFromString(data, "text/xml");
 		version = xml.getElementsByTagName("Run")[0].getAttribute("version");
@@ -98,7 +96,4 @@ Nombre de runs : {runsNumber}<br>
 
 <p>
   Conçu par la grâce de Maxtodonte2
-</p>
-<p>
-  Développé par Zdep
 </p>
