@@ -3,7 +3,6 @@
 </script>
 
 <main>
-  <h1>1max2splits</h1>
   <FileSelector/>
 </main>
 

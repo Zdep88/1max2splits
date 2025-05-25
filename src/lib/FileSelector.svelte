@@ -1,67 +1,83 @@
+<svelte:head>
+	<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+</svelte:head>
+
 <script>
-	let file = $state(null);
-	let xml = $state(null);
-	let version = $state(null);
-	let gameName = $state(null);
-	let categoryName = $state(null);
-	let runsNumber = $state(0);
-	let segments = $state([]);
-	
-	const setFile = (e) => {
-		file = e.target.files[0];
-		const reader = new FileReader();
-		reader.readAsText(file);
-		reader.onload = (event) => {
-			const data = event.target.result.toString();
-			const domParser = new window.DOMParser();
-			xml = domParser.parseFromString(data, "text/xml");
-			version = xml.getElementsByTagName("Run")[0].getAttribute("version");
-			gameName = xml.getElementsByTagName("GameName")[0].textContent;
-			categoryName = xml.getElementsByTagName("CategoryName")[0].textContent;
-			runsNumber = xml
-				.getElementsByTagName("AttemptHistory")[0]
-				.getElementsByTagName("Attempt").length;
-			segments = Array.from(xml.getElementsByTagName("Segment"))
-				.map((segment, index, array) => {
-					return {
-						name: segment.getElementsByTagName("Name")[0].textContent,
-						bestRealTime: segment
-							.getElementsByTagName("BestSegmentTime")[0]
-							.textContent.trim()
-							.split(" ")
-							.pop(),
-						runsNumber: segment.getElementsByTagName("Time").length,
-					};
-				})
-				.map((v, i, a) => {
-					return {
-						...v,
-						completedRunsNumber: a[i + 1] ? a[i + 1].runsNumber : 0,
-					};
-				})
-				.map((v, i, a) => {
-					return {
-						...v,
-						completedPercentage: v.runsNumber
-							? Math.round((v.completedRunsNumber / v.runsNumber) * 100)
-							: 0,
-					};
-				});
-		};
+let file = $state(null);
+let xml = $state(null);
+let version = $state(null);
+let gameName = $state(null);
+let categoryName = $state(null);
+let runsNumber = $state(0);
+let segments = $state([]);
+
+const getSuccessClass = (percentage) => {
+	if (Number(percentage) >= 75) return "success-high";
+	if (Number(percentage) >= 50) return "success-medium";
+	return "success-low";
+};
+
+const setFile = (e) => {
+	file = e.target.files[0];
+	const reader = new FileReader();
+	reader.readAsText(file);
+	reader.onload = (event) => {
+		const data = event.target.result.toString();
+		const domParser = new window.DOMParser();
+		xml = domParser.parseFromString(data, "text/xml");
+		version = xml.getElementsByTagName("Run")[0].getAttribute("version");
+		gameName = xml.getElementsByTagName("GameName")[0].textContent;
+		categoryName = xml.getElementsByTagName("CategoryName")[0].textContent;
+		runsNumber = xml
+			.getElementsByTagName("AttemptHistory")[0]
+			.getElementsByTagName("Attempt").length;
+		segments = Array.from(xml.getElementsByTagName("Segment"))
+			.map((segment, index, array) => {
+				return {
+					name: segment.getElementsByTagName("Name")[0].textContent,
+					bestRealTime: segment
+						.getElementsByTagName("BestSegmentTime")[0]
+						.textContent.trim()
+						.split(" ")
+						.pop(),
+					runsNumber: segment.getElementsByTagName("Time").length,
+				};
+			})
+			.map((v, i, a) => {
+				return {
+					...v,
+					completedRunsNumber: a[i + 1] ? a[i + 1].runsNumber : 0,
+				};
+			})
+			.map((v, i, a) => {
+				return {
+					...v,
+					completedPercentage: v.runsNumber
+						? Math.round((v.completedRunsNumber / v.runsNumber) * 100)
+						: 0,
+				};
+			});
 	};
-	</script>
-	
+};
+</script>
+<div class="header-container">
+	<h1>1max2splits</h1>
 	<label for="file">
-		🔥 Choisir un fichier .lss
+	  🔥 Choisir un fichier .lss
 	</label>
-	<input type="file" name="file" id="file" accept=".lss" onchange={setFile} />
+  </div>
+<input type="file" name="file" id="file" accept=".lss" onchange={setFile} />
 	
 	{#if xml}
-	<h2>Récap du fichier</h2>
-	Version : {version}<br>
-	Jeu : {gameName}<br>
-	Catégorie : {categoryName}<br>
-	Nombre de runs : {runsNumber}<br>
+	<div class="header-section">
+		<h2>Récap du fichier</h2>
+		<div class="file-info">
+			Version : {version}<br>
+			Jeu : {gameName}<br>
+			Catégorie : {categoryName}<br>
+			Nombre de runs : {runsNumber}
+		</div>
+	</div>
 	<hr>
 	<table>
 	  <thead>
@@ -88,9 +104,9 @@
 		  <td>
 			{segment.completedRunsNumber}
 		  </td>
-		  <td>
+		  <td class={getSuccessClass(segment.completedPercentage)}>
 			{segment.completedPercentage}%
-		  </td>
+		</td>
 		</tr>
 		{/each}
 	  </tbody>
@@ -99,115 +115,126 @@
 	<p>
 	  Conçu par la grâce de Maxtodonte2
 	</p>
-	
 	<style>
-	:global(body) {
-		background-color: #1a1a1a;
-		color: #c0b6a8;
-		font-family: 'Times New Roman', serif;
-		margin: 2rem;
-		background-image: linear-gradient(
-			rgba(0, 0, 0, 0.5),
-			rgba(0, 0, 0, 0.5)
-		), url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23333333' fill-opacity='0.4'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-	}
+		:global(body) {
+			background-color: #0a0a0a;
+			color: #c0c0c0;
+			font-family: 'Times New Roman', serif;
+			padding: 2rem;
+			min-height: 100vh;
+		}
+		h1 {
+  font-size: 4rem;
+  text-align: center;
+  color: #c0a672;
+  text-shadow: 3px 3px 2px black;
+  margin: 2rem 0;
+  font-family: 'MedievalSharp', cursive;
+  letter-spacing: 0.2rem;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+		h2 {
+			color: #8b0000;
+			font-size: 3.5rem;
+			text-align: center;
+			text-transform: uppercase;
+			letter-spacing: 0.3rem;
+			text-shadow: 3px 3px 2px black;
+			margin: 2rem 0;
+		}
 	
-	h2 {
+		label {
+			display: inline-block;
+			background: #2a2a2a;
+			border: 2px solid #756646;
+			color: #c0a672;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-size: 1.4rem;
+  padding: 1.5rem 3rem;
+  margin-top: 1rem;
+		}
+	
+		label:hover {
+			background: #3a3a3a;
+			border-color: #c0a672;
+			box-shadow: 0 0 15px #c0a67244;
+		}
+	
+		input[type="file"] {
+			display: none;
+		}
+	
+		.header-section {
+			background: rgba(0, 0, 0, 0.7);
+			padding: 2rem;
+			border: 1px solid #756646;
+			margin: 2rem 0;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+		}
+	
+		.file-info {
+			color: #c0a672;
+			font-size: 1.1rem;
+			line-height: 1.6;
+			text-align: center;
+		}
+	
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 2rem 0;
+			background: rgba(20, 20, 20, 0.9);
+		}
+	
+		th {
+			background-color: #2a2a2a;
+			color: #c0a672;
+			padding: 1rem;
+			border: 1px solid #756646;
+			font-weight: bold;
+			text-align: left;
+		}
+	
+		td {
+			padding: 1rem;
+			border: 1px solid #3a3a3a;
+			background-color: rgba(40, 40, 40, 0.5);
+		}
+	
+		tr:nth-child(even) td {
+			background-color: rgba(30, 30, 30, 0.5);
+		}
+	
+		hr {
+			border: 0;
+			height: 1px;
+			background-image: linear-gradient(to right, transparent, #756646, transparent);
+			margin: 2rem 0;
+		}
+	
+		p {
+			text-align: center;
+			color: #756646;
+			font-style: italic;
+			margin-top: 2rem;
+		}
+		.success-low {
 		color: #8b0000;
-		font-size: 2.5rem;
-		text-shadow: 2px 2px 2px black;
-		border-bottom: 2px solid #5a3e36;
-		padding-bottom: 0.5rem;
 	}
 	
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		margin: 2rem 0;
-		background-color: #2e2e2e;
-		box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+	.success-medium {
+		color: #c0a672;
 	}
 	
-	th {
-		background-color: #5a3e36;
-		color: #d4af37;
-		padding: 1rem;
-		text-align: left;
-		font-variant: small-caps;
-		letter-spacing: 1px;
-	}
-	
-	td {
-		padding: 0.8rem;
-		border-bottom: 1px solid #4a4a4a;
-	}
-	
-	tr:nth-child(even) {
-		background-color: #363636;
-	}
-	
-	tr:hover {
-		background-color: #4a3a32;
-		cursor: pointer;
-	}
-	
-	input[type="file"] {
-		display: none;
-	}
-	
-	label {
-		display: inline-block;
-		background: #5a3e36;
-		color: #c0b6a8;
-		padding: 0.8rem 1.5rem;
-		border: 1px solid #3a2e28;
-		border-radius: 4px;
-		cursor: pointer;
-		font-family: inherit;
-		transition: all 0.3s ease;
-	}
-	
-	label:hover {
-		background: #6a4e46;
-		border-color: #4a3e38;
-	}
-	
-	label:active {
-		background: #4a3e36;
-	}
-	
-	hr {
-		border: 0;
-		height: 1px;
-		background-image: linear-gradient(
-			to right,
-			rgba(90, 62, 54, 0),
-			rgba(90, 62, 54, 0.75),
-			rgba(90, 62, 54, 0)
-		);
-		margin: 2rem 0;
-	}
-	
-	p {
-		text-align: center;
-		font-style: italic;
-		color: #5a3e36;
-		margin-top: 2rem;
-	}
-	
-	td:nth-child(5) {
-		color: #d4af37;
-		font-weight: bold;
-	}
-	
-	td:nth-child(2) {
-		color: #ffd700;
-		font-family: monospace;
-		text-shadow: 1px 1px 2px #8b4513;
-		font-weight: bold;
-	}
-	
-	tr:hover td:nth-child(2) {
-		text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+	.success-high {
+		color: #008b00;
 	}
 	</style>
