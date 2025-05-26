@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "git checkout main && git pull && vite build && sudo rm -r /var/www/1max2splits/* && sudo cp -r dist/* /var/www/1max2splits",
+    "build": "git checkout main && git pull && npm i && vite build && sudo rm -r /var/www/1max2splits/* && sudo cp -r dist/* /var/www/1max2splits",
     "preview": "vite preview"
   },
   "devDependencies": {

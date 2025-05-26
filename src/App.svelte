@@ -1,5 +1,5 @@
 <script>
-  import FileSelector from "./lib/FileSelector.svelte";
+  import FileSelector from "./FileSelector.svelte";
 </script>
 
 <main>
